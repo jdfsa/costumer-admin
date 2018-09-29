@@ -40,9 +40,15 @@ public class CustomerService {
      *
      * @param id customer id
      * @return the customer
+     * @throws CustomerNotFoundException
      */
-    public Customer getCustomer(String id) {
-        return customerRepository.findCostumerById(id);
+    public Customer getCustomer(String id) throws CustomerNotFoundException {
+        Customer customer = customerRepository.findCostumerById(id);
+        if (customer == null) {
+            throw new CustomerNotFoundException("Customer not found");
+        }
+
+        return customer;
     }
 
     /**
