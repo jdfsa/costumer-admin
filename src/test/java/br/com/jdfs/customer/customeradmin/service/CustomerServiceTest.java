@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -26,11 +27,11 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 public class CustomerServiceTest {
 
-    @Mock
-    private CustomerRepository customerRepository;
-
     @InjectMocks
     private CustomerService customerService;
+
+    @Mock
+    private CustomerRepository customerRepository;
 
     @Mock
     private GeolocalizationService geolocalizationService;

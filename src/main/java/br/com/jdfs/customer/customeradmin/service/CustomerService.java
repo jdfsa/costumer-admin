@@ -14,6 +14,7 @@ import java.util.UUID;
 /**
  * Customer service
  */
+@Service
 public class CustomerService {
 
     @Autowired

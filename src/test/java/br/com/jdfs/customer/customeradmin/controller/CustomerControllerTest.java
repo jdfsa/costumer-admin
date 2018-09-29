@@ -35,7 +35,7 @@ public class CustomerControllerTest {
     private IpDiscoveryService ipDiscoveryService;
 
     @Before
-    public void beforeEach() throws Exception {
+    public void beforeEach() {
         List<Customer> customersMock = Arrays.asList(
                 new Customer() {
                     {
@@ -63,6 +63,7 @@ public class CustomerControllerTest {
         when(customerService.getCustomer(anyString())).thenReturn(customersMock.get(2));
         when(customerService.addCustomer(any(Customer.class), anyString())).thenReturn(customersMock.get(1));
         when(customerService.updateCustomer(anyString(), any(Customer.class))).thenReturn(customersMock.get(2));
+        when(ipDiscoveryService.getIpAddress()).thenReturn("10.10.10.10");
     }
 
     @Test
