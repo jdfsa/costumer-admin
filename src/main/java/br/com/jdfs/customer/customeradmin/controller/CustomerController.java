@@ -1,11 +1,16 @@
 package br.com.jdfs.customer.customeradmin.controller;
 
+import br.com.jdfs.customer.customeradmin.exception.CustomerNotFoundException;
+import br.com.jdfs.customer.customeradmin.exception.LocationDataNotAvailableException;
+import br.com.jdfs.customer.customeradmin.exception.WheatherDataNotAvailableException;
 import br.com.jdfs.customer.customeradmin.model.Customer;
 import br.com.jdfs.customer.customeradmin.service.CustomerService;
+import br.com.jdfs.customer.customeradmin.service.IpDiscoveryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -18,6 +23,9 @@ public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private IpDiscoveryService ipDiscoveryService;
 
     /**
      * Gets all customeres from the repository
@@ -50,8 +58,12 @@ public class CustomerController {
      */
     @PostMapping
     @ResponseBody
-    public ResponseEntity<Customer> addCustomer(@Valid @RequestBody Customer customer) {
-        return ResponseEntity.ok(customerService.addCustomer(customer));
+    public ResponseEntity<Customer> addCustomer(@Valid @RequestBody Customer customer,
+                                                HttpServletRequest request)
+        throws LocationDataNotAvailableException, WheatherDataNotAvailableException {
+
+        String ipAddress = getIpAddress(request);
+        return ResponseEntity.ok(customerService.addCustomer(customer, ipAddress));
     }
 
     /**
@@ -64,7 +76,7 @@ public class CustomerController {
     @PutMapping(value = "/{id}")
     @ResponseBody
     public ResponseEntity<Customer> updateCustomer(@PathVariable("id") String id,
-                                                   @Valid @RequestBody Customer customer) {
+                                                   @Valid @RequestBody Customer customer) throws CustomerNotFoundException {
         return ResponseEntity.ok(customerService.updateCustomer(id, customer));
     }
 
@@ -74,7 +86,23 @@ public class CustomerController {
      * @param id customeer id to be deleted
      */
     @DeleteMapping(value = "/{id}")
-    public void deleteCustomer(@PathVariable("id") String id) {
+    public void deleteCustomer(@PathVariable("id") String id) throws CustomerNotFoundException {
         customerService.deleteCustomer(id);
+    }
+
+    /**
+     * Gets the client API address
+     *
+     * @param request request object
+     * @return the IP address
+     */
+    private String getIpAddress(HttpServletRequest request) {
+
+        // when running locally the IP address is not valid for the application purposes
+        if (request != null && !request.getRemoteAddr().equals("0:0:0:0:0:0:0:1") && !request.getRemoteAddr().equals("127.0.0.1")) {
+            return request.getRemoteAddr();
+        }
+
+        return ipDiscoveryService.getIpAddress();
     }
 }

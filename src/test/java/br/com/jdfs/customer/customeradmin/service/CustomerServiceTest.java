@@ -1,6 +1,6 @@
 package br.com.jdfs.customer.customeradmin.service;
 
-import br.com.jdfs.customer.customeradmin.model.Customer;
+import br.com.jdfs.customer.customeradmin.model.*;
 import br.com.jdfs.customer.customeradmin.repository.CustomerRepository;
 import org.junit.Assert;
 import org.junit.Before;
@@ -8,14 +8,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +31,12 @@ public class CustomerServiceTest {
 
     @InjectMocks
     private CustomerService customerService;
+
+    @Mock
+    private GeolocalizationService geolocalizationService;
+
+    @Mock
+    private WheatherService wheatherService;
 
     @Before
     public void beforeEach() {
@@ -56,7 +65,49 @@ public class CustomerServiceTest {
         );
         when(customerRepository.findAll()).thenReturn(customersMock);
         when(customerRepository.findCostumerById(anyString())).thenReturn(customersMock.get(2));
-        // when(customerRepository.delete(any(Customer.class));
+        when(geolocalizationService.getData(anyString())).thenReturn(new GeoWrapper() {
+            {
+                setStatus("success");
+                setData(new GeoData() {
+                    {
+                        setLatitude("-11.11");
+                        setLongitude("-22.22");
+                    }
+                });
+            }
+        });
+        when(wheatherService.getLocation(anyString(), anyString())).thenReturn(Arrays.asList(
+                new LocationData() {
+                    {
+                        setWoeid(11111);
+                        setLattLong("-11.1,-11.1");
+                    }
+                },
+                new LocationData() {
+                    {
+                        setWoeid(22222);
+                        setLattLong("-22.2,-22.2");
+                    }
+                }
+        ));
+        when(wheatherService.getWheatherData(anyInt())).thenReturn(new WheatherWrapper() {
+            {
+                setConsolidatedWheater(Arrays.asList(
+                        new WheatherData() {
+                            {
+                                setMaxTemp(25f);
+                                setMinTemp(15f);
+                            }
+                        },
+                        new WheatherData() {
+                            {
+                                setMaxTemp(32f);
+                                setMinTemp(10f);
+                            }
+                        }
+                ));
+            }
+        });
     }
 
     @Test
@@ -75,20 +126,25 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testAddCustomer() {
+    public void testAddCustomer() throws Exception {
         Customer customer = customerService.addCustomer(new Customer() {
             {
                 setName("name-test-2");
                 setAge(2);
+                setMinTemp(15f);
+                setMaxTemp(25f);
             }
-        });
+        }, "");
         Assert.assertNotNull(customer.getId());
         Assert.assertEquals("name-test-2", customer.getName());
         Assert.assertEquals(Long.valueOf(2), Long.valueOf(customer.getAge()));
+        Assert.assertEquals( Float.valueOf(15f), Float.valueOf(customer.getMinTemp()));
+        Assert.assertEquals( Float.valueOf(25f), Float.valueOf(customer.getMaxTemp()));
+
     }
 
     @Test
-    public void testUpdateCustomer() {
+    public void testUpdateCustomer() throws Exception {
         Customer newCustomer = new Customer() {
             {
                 setName("name-test-3-renamed");
@@ -104,7 +160,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    public void testDelteCustomer() {
+    public void testDelteCustomer() throws Exception {
         customerService.deleteCustomer("id-test-1");
         verify(customerRepository).delete(any(Customer.class));
     }

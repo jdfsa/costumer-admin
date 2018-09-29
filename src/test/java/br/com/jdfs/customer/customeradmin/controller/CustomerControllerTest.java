@@ -2,6 +2,7 @@ package br.com.jdfs.customer.customeradmin.controller;
 
 import br.com.jdfs.customer.customeradmin.model.Customer;
 import br.com.jdfs.customer.customeradmin.service.CustomerService;
+import br.com.jdfs.customer.customeradmin.service.IpDiscoveryService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,8 +31,11 @@ public class CustomerControllerTest {
     @MockBean
     private CustomerService customerService;
 
+    @MockBean
+    private IpDiscoveryService ipDiscoveryService;
+
     @Before
-    public void beforeEach() {
+    public void beforeEach() throws Exception {
         List<Customer> customersMock = Arrays.asList(
                 new Customer() {
                     {
@@ -57,7 +61,7 @@ public class CustomerControllerTest {
         );
         when(customerService.getCustomer()).thenReturn(customersMock);
         when(customerService.getCustomer(anyString())).thenReturn(customersMock.get(2));
-        when(customerService.addCustomer(any(Customer.class))).thenReturn(customersMock.get(1));
+        when(customerService.addCustomer(any(Customer.class), anyString())).thenReturn(customersMock.get(1));
         when(customerService.updateCustomer(anyString(), any(Customer.class))).thenReturn(customersMock.get(2));
     }
 
