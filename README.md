@@ -62,7 +62,7 @@ Para subir uma instância da API, dirija-se à pasta "/target" e execute o coman
 ```
 java -jar <arquivo_compilado>.jar
 ```
-OBS: tente-se às configurações de ambiente (application.properties); caso seja necessário, pode-se copiar o arquivo correspondente às configurações para a mesma pasta do arquivo .jar a ser executado.
+OBS: atente-se às configurações de ambiente (application.properties); caso seja necessário, pode-se copiar o arquivo correspondente às configurações para a mesma pasta do arquivo .jar a ser executado.
 
 
 ## Considerações finais
